@@ -177,18 +177,27 @@ namespace PhotonDebug
 
 						try
 						{
-							var collection = obj.Cast<Il2CppSystem.Collections.ICollection>();
-							var enumerable = obj.Cast<Il2CppSystem.Collections.IEnumerable>();
-
-							Byte[] bytes = new Byte[collection.Count];
-
-							int i = 0;
-							foreach (var item in enumerable)
+							/*
+							UnhollowerBaseLib.Il2CppArrayBase<Byte> a = obj.Cast<UnhollowerBaseLib.Il2CppArrayBase<Byte>>();
+							Byte[] cpy = new Byte[a.Count];
+							for (int i = 0; i < cpy.Length; i++)
 							{
-								 bytes[i++] = Byte.Parse(obj.ToString());
+								cpy[i] = a[i];
 							}
-
-							jobj["data"] = Convert.ToBase64String(bytes);
+							Console.WriteLine(cpy.Length + " " + BitConverter.ToString(cpy).Replace("-", ""));
+							*/
+							// The following code should act identically to the above code, but faster
+							byte[] array;
+							unsafe
+							{
+								Byte* objPtr = (Byte*)obj.Pointer;
+								Int32 arraySize = *(Int32*)(objPtr + 24);
+								array = new byte[arraySize];
+								UnmanagedMemoryStream ohfuk = new UnmanagedMemoryStream(objPtr + 32, arraySize);
+								ohfuk.Read(array, 0, arraySize);
+							}
+							//Console.WriteLine(array.Length + " " + BitConverter.ToString(array).Replace("-", ""));
+							jobj["data"] = Convert.ToBase64String(array);
 						}
 						catch (Exception ex)
 						{
