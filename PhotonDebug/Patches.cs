@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -198,6 +199,33 @@ namespace PhotonDebug
 							}
 							//Console.WriteLine(array.Length + " " + BitConverter.ToString(array).Replace("-", ""));
 							jobj["data"] = Convert.ToBase64String(array);
+						}
+						catch (Exception ex)
+						{
+							jobj["exception"] = ex.ToString();
+						}
+					}
+					else if (objTypeString == "System.String[][]")
+					{
+						jobj["type"] = "String[][]";
+
+						try
+						{
+							JArray outerArray = new JArray();
+							UnhollowerBaseLib.Il2CppArrayBase<UnhollowerBaseLib.Il2CppStringArray> a = obj.Cast<UnhollowerBaseLib.Il2CppArrayBase<UnhollowerBaseLib.Il2CppStringArray>>();
+							for (int i = 0; i < a.Count; i++)
+							{
+								JArray innerArray = new JArray();
+
+								for (int j = 0; j < a[i].Length; j++)
+								{
+									innerArray[j] = a[i][j];
+								}
+
+								outerArray[i] = innerArray;
+							}
+
+							jobj["data"] = outerArray;
 						}
 						catch (Exception ex)
 						{
