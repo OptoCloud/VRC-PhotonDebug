@@ -2,7 +2,6 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -149,6 +148,11 @@ namespace PhotonDebug
 							jobj["type"] = "Int32";
 							jobj["data"] = Il2CppSystem.Convert.ToInt32(obj);
 						}
+						else if (objTypeString == "System.Double")
+						{
+							jobj["type"] = "Double";
+							jobj["data"] = Il2CppSystem.Convert.ToDouble(obj);
+						}
 						else if (objTypeString == "System.String")
 						{
 							jobj["type"] = "String";
@@ -179,25 +183,71 @@ namespace PhotonDebug
 							//Console.WriteLine(array.Length + " " + BitConverter.ToString(array).Replace("-", ""));
 							jobj["data"] = Convert.ToBase64String(array);
 						}
+						else if (objTypeString == "System.Int32[]")
+						{
+							jobj["type"] = "Int32[]";
+
+							JArray array = new JArray();
+							Il2CppSystem.Collections.IEnumerator e1 = obj.Cast<Il2CppSystem.Collections.IEnumerable>().GetEnumerator();
+
+							while (e1.MoveNext())
+							{
+								array.Add(Il2CppSystem.Convert.ToInt32(e1.Current));
+							}
+
+							jobj["data"] = array;
+						}
+						else if (objTypeString == "System.String[]")
+						{
+							jobj["type"] = "String[]";
+
+							JArray array = new JArray();
+							Il2CppSystem.Collections.IEnumerator e1 = obj.Cast<Il2CppSystem.Collections.IEnumerable>().GetEnumerator();
+
+							while (e1.MoveNext())
+							{
+								array.Add(Il2CppSystem.Convert.ToString(e1.Current));
+							}
+
+							jobj["data"] = array;
+						}
 						else if (objTypeString == "System.String[][]")
 						{
 							jobj["type"] = "String[][]";
 
 							JArray outerArray = new JArray();
-							UnhollowerBaseLib.Il2CppArrayBase<UnhollowerBaseLib.Il2CppStringArray> a = obj.Cast<UnhollowerBaseLib.Il2CppArrayBase<UnhollowerBaseLib.Il2CppStringArray>>();
-							for (int i = 0; i < a.Count; i++)
+							Console.WriteLine(obj.ToString());
+							Il2CppSystem.Collections.IEnumerator e1 = obj.Cast<Il2CppSystem.Collections.IEnumerable>().GetEnumerator();
+
+							while (e1.MoveNext())
 							{
 								JArray innerArray = new JArray();
 
-								for (int j = 0; j < a[i].Length; j++)
+								UnhollowerBaseLib.Il2CppStringArray e2 = e1.Current.Cast<UnhollowerBaseLib.Il2CppStringArray>();
+								Console.WriteLine(e2.Length);
+								foreach (var str in e2)
 								{
-									innerArray[j] = a[i][j];
+									innerArray.Add(str);
 								}
 
-								outerArray[i] = innerArray;
+								outerArray.Add(innerArray);
 							}
 
 							jobj["data"] = outerArray;
+						}
+						else if (objTypeString == "System.Object[]")
+						{
+							jobj["type"] = "Object[]";
+
+							JArray array = new JArray();
+							Il2CppSystem.Collections.IEnumerator e1 = obj.Cast<Il2CppSystem.Collections.IEnumerable>().GetEnumerator();
+
+							while (e1.MoveNext())
+							{
+								array.Add(ParseIl2CppObject(e1.Current));
+							}
+
+							jobj["data"] = array;
 						}
 						else
 						{
