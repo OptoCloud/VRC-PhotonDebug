@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
@@ -190,11 +191,10 @@ namespace PhotonDebug
 							byte[] array;
 							unsafe
 							{
-								Byte* objPtr = (Byte*)obj.Pointer;
+								IntPtr objPtr = obj.Pointer;
 								Int32 arraySize = *(Int32*)(objPtr + 24);
 								array = new byte[arraySize];
-								UnmanagedMemoryStream ohfuk = new UnmanagedMemoryStream(objPtr + 32, arraySize);
-								ohfuk.Read(array, 0, arraySize);
+								Marshal.Copy(objPtr + 32, array, 0, arraySize);
 							}
 							//Console.WriteLine(array.Length + " " + BitConverter.ToString(array).Replace("-", ""));
 							jobj["data"] = Convert.ToBase64String(array);
