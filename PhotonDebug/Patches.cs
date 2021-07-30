@@ -288,7 +288,7 @@ namespace PhotonDebug
 				else
 				{
 					jobj = new JObject(
-						new JProperty("type", "Il2CppSystem.Object"),
+						new JProperty("type", "Object"),
 						new JProperty("data", "null")
 						);
 				}
@@ -296,7 +296,7 @@ namespace PhotonDebug
 			catch (Exception ex)
 			{
 				jobj = new JObject(
-					new JProperty("type", "Il2CppSystem.Object"),
+					new JProperty("type", "Object"),
 					new JProperty("exception", ex.ToString())
 					);
 			}
