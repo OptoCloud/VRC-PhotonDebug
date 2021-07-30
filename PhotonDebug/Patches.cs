@@ -197,7 +197,7 @@ namespace PhotonDebug
 					}
 					else if (objType.ToString() == "System.Int32")
 					{
-						jobj["type"] = "Boolean";
+						jobj["type"] = "Int32";
 
 						try
 						{
