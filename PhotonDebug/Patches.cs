@@ -71,6 +71,7 @@ namespace PhotonDebug
 				if (obj != null)
 				{
 					Il2CppSystem.Type objType = obj.GetIl2CppType();
+					String objTypeString = objType.ToString();
 					jobj = new JObject();
 
 					if (objType == Type_Il2CppHashtable)
@@ -158,7 +159,7 @@ namespace PhotonDebug
 							jobj["exception"] = ex.ToString();
 						}
 					}
-					else if (objType.ToString() == "Il2CppSystem.String")
+					else if (objTypeString == "System.String")
 					{
 						jobj["type"] = "String";
 
@@ -171,7 +172,7 @@ namespace PhotonDebug
 							jobj["exception"] = ex.ToString();
 						}
 					}
-					else if (objType.ToString() == "System.Byte[]")
+					else if (objTypeString == "System.Byte[]")
 					{
 						jobj["type"] = "Byte[]";
 
@@ -203,7 +204,7 @@ namespace PhotonDebug
 							jobj["exception"] = ex.ToString();
 						}
 					}
-					else if (objType.ToString() == "System.Int32")
+					else if (objTypeString == "System.Int32")
 					{
 						jobj["type"] = "Int32";
 
@@ -216,7 +217,7 @@ namespace PhotonDebug
 							jobj["exception"] = ex.ToString();
 						}
 					}
-					else if (objType.ToString() == "System.Byte")
+					else if (objTypeString == "System.Byte")
 					{
 						jobj["type"] = "Byte";
 
@@ -229,7 +230,7 @@ namespace PhotonDebug
 							jobj["exception"] = ex.ToString();
 						}
 					}
-					else if (objType.ToString() == "System.Boolean")
+					else if (objTypeString == "System.Boolean")
 					{
 						jobj["type"] = "Boolean";
 
@@ -244,7 +245,7 @@ namespace PhotonDebug
 					}
 					else
 					{
-						jobj["type"] = objType.ToString();
+						jobj["type"] = objTypeString;
 
 						try
 						{
