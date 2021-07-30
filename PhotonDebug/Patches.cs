@@ -75,12 +75,12 @@ namespace PhotonDebug
 					String objTypeString = objType.ToString();
 					jobj = new JObject();
 
-					if (objType == Type_Il2CppHashtable)
+					try
 					{
-						jobj["type"] = "HashTable";
-
-						try
+						if (objType == Type_Il2CppHashtable)
 						{
+							jobj["type"] = "HashTable";
+
 							Il2CppSystem.Collections.Hashtable hashtable = obj.Cast<Il2CppSystem.Collections.Hashtable>();
 
 							Il2CppSystem.Collections.IEnumerator enumerator = hashtable.System_Collections_IEnumerable_GetEnumerator();
@@ -94,17 +94,10 @@ namespace PhotonDebug
 
 							jobj["data"] = jdata;
 						}
-						catch (Exception ex)
+						else if (objType == Type_Il2CppDictionary_String_Il2CppObject)
 						{
-							jobj["exception"] = ex.ToString();
-						}
-					}
-					else if (objType == Type_Il2CppDictionary_String_Il2CppObject)
-					{
-						jobj["type"] = "Dictionary<String, Object>";
+							jobj["type"] = "Dictionary<String, Object>";
 
-						try
-						{
 							var dictionary = obj.Cast<Il2CppSystem.Collections.Generic.Dictionary<String, Il2CppSystem.Object>>();
 
 							var jdata = new JObject();
@@ -115,17 +108,10 @@ namespace PhotonDebug
 
 							jobj["data"] = jdata;
 						}
-						catch (Exception ex)
+						else if (objType == Type_Il2CppDictionary_Byte_Il2CppObject)
 						{
-							jobj["exception"] = ex.ToString();
-						}
-					}
-					else if (objType == Type_Il2CppDictionary_Byte_Il2CppObject)
-					{
-						jobj["type"] = "Dictionary<Byte, Object>";
+							jobj["type"] = "Dictionary<Byte, Object>";
 
-						try
-						{
 							var dictionary = obj.Cast<Il2CppSystem.Collections.Generic.Dictionary<Byte, Il2CppSystem.Object>>();
 
 							var jdata = new JObject();
@@ -136,17 +122,10 @@ namespace PhotonDebug
 
 							jobj["data"] = jdata;
 						}
-						catch (Exception ex)
+						else if (objType == Type_Il2CppDictionary_Entry)
 						{
-							jobj["exception"] = ex.ToString();
-						}
-					}
-					else if (objType == Type_Il2CppDictionary_Entry)
-					{
-						jobj["type"] = "DictionaryEntry";
+							jobj["type"] = "DictionaryEntry";
 
-						try
-						{
 							var entry = obj.Cast<Il2CppSystem.Collections.DictionaryEntry>();
 
 							jobj["data"] = new JObject
@@ -155,30 +134,30 @@ namespace PhotonDebug
 								new JProperty("value", ParseIl2CppObject(entry.Key))
 							};
 						}
-						catch (Exception ex)
+						else if (objTypeString == "System.Boolean")
 						{
-							jobj["exception"] = ex.ToString();
+							jobj["type"] = "Boolean";
+							jobj["data"] = Il2CppSystem.Convert.ToBoolean(obj);
 						}
-					}
-					else if (objTypeString == "System.String")
-					{
-						jobj["type"] = "String";
-
-						try
+						else if (objTypeString == "System.Byte")
 						{
+							jobj["type"] = "Byte";
+							jobj["data"] = Il2CppSystem.Convert.ToByte(obj);
+						}
+						else if (objTypeString == "System.Int32")
+						{
+							jobj["type"] = "Int32";
+							jobj["data"] = Il2CppSystem.Convert.ToInt32(obj);
+						}
+						else if (objTypeString == "System.String")
+						{
+							jobj["type"] = "String";
 							jobj["data"] = Il2CppSystem.Convert.ToString(obj);
 						}
-						catch (Exception ex)
+						else if (objTypeString == "System.Byte[]")
 						{
-							jobj["exception"] = ex.ToString();
-						}
-					}
-					else if (objTypeString == "System.Byte[]")
-					{
-						jobj["type"] = "Byte[]";
+							jobj["type"] = "Byte[]";
 
-						try
-						{
 							/*
 							UnhollowerBaseLib.Il2CppArrayBase<Byte> a = obj.Cast<UnhollowerBaseLib.Il2CppArrayBase<Byte>>();
 							Byte[] cpy = new Byte[a.Count];
@@ -200,17 +179,10 @@ namespace PhotonDebug
 							//Console.WriteLine(array.Length + " " + BitConverter.ToString(array).Replace("-", ""));
 							jobj["data"] = Convert.ToBase64String(array);
 						}
-						catch (Exception ex)
+						else if (objTypeString == "System.String[][]")
 						{
-							jobj["exception"] = ex.ToString();
-						}
-					}
-					else if (objTypeString == "System.String[][]")
-					{
-						jobj["type"] = "String[][]";
+							jobj["type"] = "String[][]";
 
-						try
-						{
 							JArray outerArray = new JArray();
 							UnhollowerBaseLib.Il2CppArrayBase<UnhollowerBaseLib.Il2CppStringArray> a = obj.Cast<UnhollowerBaseLib.Il2CppArrayBase<UnhollowerBaseLib.Il2CppStringArray>>();
 							for (int i = 0; i < a.Count; i++)
@@ -227,62 +199,19 @@ namespace PhotonDebug
 
 							jobj["data"] = outerArray;
 						}
-						catch (Exception ex)
+						else
 						{
-							jobj["exception"] = ex.ToString();
-						}
-					}
-					else if (objTypeString == "System.Int32")
-					{
-						jobj["type"] = "Int32";
-
-						try
-						{
-							jobj["data"] = Il2CppSystem.Convert.ToInt32(obj);
-						}
-						catch (Exception ex)
-						{
-							jobj["exception"] = ex.ToString();
-						}
-					}
-					else if (objTypeString == "System.Byte")
-					{
-						jobj["type"] = "Byte";
-
-						try
-						{
-							jobj["data"] = Il2CppSystem.Convert.ToByte(obj);
-						}
-						catch (Exception ex)
-						{
-							jobj["exception"] = ex.ToString();
-						}
-					}
-					else if (objTypeString == "System.Boolean")
-					{
-						jobj["type"] = "Boolean";
-
-						try
-						{
-							jobj["data"] = Il2CppSystem.Convert.ToBoolean(obj);
-						}
-						catch (Exception ex)
-						{
-							jobj["exception"] = ex.ToString();
-						}
-					}
-					else
-					{
-						jobj["type"] = objTypeString;
-
-						try
-						{
+							jobj["type"] = objTypeString;
 							jobj["data"] = obj.ToString();
 						}
-						catch (Exception ex)
+					}
+					catch (Exception ex)
+					{
+						if (!jobj.ContainsKey("type"))
 						{
-							jobj["exception"] = ex.ToString();
+							jobj["type"] = objTypeString;
 						}
+						jobj["exception"] = ex.ToString();
 					}
 				}
 				else
