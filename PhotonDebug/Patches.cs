@@ -319,7 +319,7 @@ namespace PhotonDebug
 		}
 
 		[MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
-		private static void OnEventPatch(ExitGames.Client.Photon.EventData eventData)
+		private static void OnEventPatch(ExitGames.Client.Photon.EventData param_1)
 		{
 			var sinceEpoch = DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1));
 
@@ -328,21 +328,21 @@ namespace PhotonDebug
 					new JProperty("patch_name", "OnEventPatch"),
 					new JProperty("patch_args", new JObject(
 						new JProperty("eventData", new JObject(
-							new JProperty("Code", eventData.Code),
-							new JProperty("Parameters", ParseIl2CppObject(eventData.Parameters)),
-							new JProperty("SenderKey", eventData.SenderKey),
-							new JProperty("sender", eventData.sender),
-							new JProperty("CustomDataKey", eventData.CustomDataKey),
-							new JProperty("CustomData", ParseIl2CppObject(eventData.customData)),
-							new JProperty("Sender", eventData.Sender),
-							new JProperty("CustomData", ParseIl2CppObject(eventData.CustomData))
+							new JProperty("Code", param_1.Code),
+							new JProperty("Parameters", ParseIl2CppObject(param_1.Parameters)),
+							new JProperty("SenderKey", param_1.SenderKey),
+							new JProperty("sender", param_1.sender),
+							new JProperty("CustomDataKey", param_1.CustomDataKey),
+							new JProperty("customData", ParseIl2CppObject(param_1.customData)),
+							new JProperty("Sender", param_1.Sender),
+							new JProperty("CustomData", ParseIl2CppObject(param_1.CustomData))
 							))
 					))
 				));
 		}
 
 		[MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
-		private static void OnOperationResponsePatch(ExitGames.Client.Photon.OperationResponse operationResponse)
+		private static void OnOperationResponsePatch(ExitGames.Client.Photon.OperationResponse param_1)
 		{
 			var sinceEpoch = DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1));
 
@@ -351,17 +351,17 @@ namespace PhotonDebug
 					new JProperty("patch_name", "OnOperationResponsePatch"),
 					new JProperty("patch_args", new JObject(
 						new JProperty("operationResponse", new JObject(
-							new JProperty("OperationCode", operationResponse.OperationCode),
-							new JProperty("ReturnCode", operationResponse.ReturnCode),
-							new JProperty("DebugMessage", operationResponse.DebugMessage),
-							new JProperty("Parameters", ParseIl2CppObject(operationResponse.Parameters))
+							new JProperty("OperationCode", param_1.OperationCode),
+							new JProperty("ReturnCode", param_1.ReturnCode),
+							new JProperty("DebugMessage", param_1.DebugMessage),
+							new JProperty("Parameters", ParseIl2CppObject(param_1.Parameters))
 							))
 					))
 				));
 		}
 
 		[MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
-		private static void OnStatusChangedPatch(ExitGames.Client.Photon.StatusCode statusCode)
+		private static void OnStatusChangedPatch(ExitGames.Client.Photon.StatusCode param_1)
 		{
 			var sinceEpoch = DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1));
 
@@ -369,7 +369,7 @@ namespace PhotonDebug
 					new JProperty("utc_time", sinceEpoch.TotalSeconds),
 					new JProperty("patch_name", "OnStatusChangedPatch"),
 					new JProperty("patch_args", new JObject(
-						new JProperty("statusCode", $"{(int)statusCode} ({statusCode})")
+						new JProperty("statusCode", $"{(int)param_1} ({param_1})")
 					))
 				));
 		}
