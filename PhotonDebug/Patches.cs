@@ -2,7 +2,6 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -281,7 +280,7 @@ namespace PhotonDebug
 		{
 			Byte[] jsondata = Encoding.UTF8.GetBytes(obj.ToString(Formatting.None));
 
-			lock(logFileLock)
+			lock (logFileLock)
 			{
 				using (var fileStream = new FileStream(logFileName, FileMode.OpenOrCreate, FileAccess.ReadWrite))
 				{
