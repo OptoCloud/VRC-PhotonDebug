@@ -327,6 +327,7 @@ namespace PhotonDebug
 			harmonyInstane.Patch(typeof(Photon.Realtime.LoadBalancingClient).GetMethod("OnEvent", BindingFlags.Public | BindingFlags.Instance), GetPatch("OnEventPatch"));
 			harmonyInstane.Patch(typeof(Photon.Realtime.LoadBalancingClient).GetMethod("OnOperationResponse", BindingFlags.Public | BindingFlags.Instance), GetPatch("OnOperationResponsePatch"));
 			harmonyInstane.Patch(typeof(Photon.Realtime.LoadBalancingClient).GetMethod("OnStatusChanged", BindingFlags.Public | BindingFlags.Instance), GetPatch("OnStatusChangedPatch"));
+			harmonyInstane.Patch(typeof(Photon.Realtime.Player).GetMethod("Method_Public_Void_Hashtable_0", BindingFlags.Public | BindingFlags.Instance), GetPatch("SetAppSettingsPatch"));
 		}
 
 		[MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
@@ -420,6 +421,40 @@ namespace PhotonDebug
 					new JProperty("patch_name", "OnStatusChangedPatch"),
 					new JProperty("patch_args", new JObject(
 						new JProperty("statusCode", $"{(int)param_1} ({param_1})")
+					))
+				));
+		}
+
+		[MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
+		private static void SetAppSettingsPatch(Photon.Realtime.AppSettings param_1)
+		{
+			var sinceEpoch = DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1));
+
+			LogJson(new JObject(
+					new JProperty("utc_time", sinceEpoch.TotalSeconds),
+					new JProperty("patch_name", "SetAppSettingsPatch"),
+					new JProperty("patch_args", new JObject(
+						new JProperty("appSettings", new JObject(
+							new JProperty("NetworkLogging", param_1.NetworkLogging),
+							new JProperty("AppIdChat", param_1.AppIdChat),
+							new JProperty("AppIdVoice", param_1.AppIdVoice),
+							new JProperty("AppVersion", param_1.AppVersion),
+							new JProperty("UseNameServer", param_1.UseNameServer),
+							new JProperty("FixedRegion", param_1.FixedRegion),
+							new JProperty("BestRegionSummaryFromStorage", param_1.BestRegionSummaryFromStorage),
+							new JProperty("IsMasterServerAddress", param_1.IsMasterServerAddress),
+							new JProperty("Server", param_1.Server),
+							new JProperty("AppIdRealtime", param_1.AppIdRealtime),
+							new JProperty("Protocol", param_1.Protocol),
+							new JProperty("EnableProtocolFallback", param_1.EnableProtocolFallback),
+							new JProperty("AuthMode", param_1.AuthMode),
+							new JProperty("IsBestRegion", param_1.IsBestRegion),
+							new JProperty("EnableLobbyStatistics", param_1.EnableLobbyStatistics),
+							new JProperty("Port", param_1.Port),
+							new JProperty("ProxyServer", param_1.ProxyServer),
+							new JProperty("IsDefaultPort", param_1.IsDefaultPort),
+							new JProperty("IsDefaultNameServer", param_1.IsDefaultNameServer)
+							))
 					))
 				));
 		}
