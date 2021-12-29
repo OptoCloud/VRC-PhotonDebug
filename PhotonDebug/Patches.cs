@@ -2,12 +2,14 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using UnhollowerBaseLib;
 
 namespace PhotonDebug
 {
@@ -71,7 +73,6 @@ namespace PhotonDebug
 				if (obj != null)
 				{
 					Il2CppSystem.Type objType = obj.GetIl2CppType();
-					String objTypeString = objType.ToString();
 					jobj = new JObject();
 
 					try
@@ -123,6 +124,9 @@ namespace PhotonDebug
 						}
 						else if (objType == Type_Il2CppDictionary_Entry)
 						{
+
+							System.Type type = ((object)obj).GetType();
+							Console.WriteLine($"{obj}, {type}, {type.Name}, {type.FullName}, {objType}, {objType.Name}, {objType.FullName}");
 							jobj["type"] = "DictionaryEntry";
 
 							var entry = obj.Cast<Il2CppSystem.Collections.DictionaryEntry>();
@@ -133,133 +137,114 @@ namespace PhotonDebug
 								new JProperty("value", ParseIl2CppObject(entry.Key))
 							};
 						}
-						else if (objTypeString == "System.Boolean")
-						{
-							jobj["type"] = "Boolean";
-							jobj["data"] = Il2CppSystem.Convert.ToBoolean(obj);
-						}
-						else if (objTypeString == "System.Byte")
-						{
-							jobj["type"] = "Byte";
-							jobj["data"] = Il2CppSystem.Convert.ToByte(obj);
-						}
-						else if (objTypeString == "System.Int32")
-						{
-							jobj["type"] = "Int32";
-							jobj["data"] = Il2CppSystem.Convert.ToInt32(obj);
-						}
-						else if (objTypeString == "System.Double")
-						{
-							jobj["type"] = "Double";
-							jobj["data"] = Il2CppSystem.Convert.ToDouble(obj);
-						}
-						else if (objTypeString == "System.String")
-						{
-							jobj["type"] = "String";
-							jobj["data"] = Il2CppSystem.Convert.ToString(obj);
-						}
-						else if (objTypeString == "System.Byte[]")
-						{
-							jobj["type"] = "Byte[]";
-
-							/*
-							UnhollowerBaseLib.Il2CppArrayBase<Byte> a = obj.Cast<UnhollowerBaseLib.Il2CppArrayBase<Byte>>();
-							Byte[] cpy = new Byte[a.Count];
-							for (int i = 0; i < cpy.Length; i++)
-							{
-								cpy[i] = a[i];
-							}
-							Console.WriteLine(cpy.Length + " " + BitConverter.ToString(cpy).Replace("-", ""));
-							*/
-							// The following code should act identically to the above code, but faster
-							byte[] array;
-							unsafe
-							{
-								IntPtr objPtr = obj.Pointer;
-								Int32 arraySize = *(Int32*)(objPtr + 24);
-								array = new byte[arraySize];
-								Marshal.Copy(objPtr + 32, array, 0, arraySize);
-							}
-							//Console.WriteLine(array.Length + " " + BitConverter.ToString(array).Replace("-", ""));
-							jobj["data"] = Convert.ToBase64String(array);
-						}
-						else if (objTypeString == "System.Int32[]")
-						{
-							jobj["type"] = "Int32[]";
-
-							JArray array = new JArray();
-							Il2CppSystem.Collections.IEnumerator e1 = obj.Cast<Il2CppSystem.Collections.IEnumerable>().GetEnumerator();
-
-							while (e1.MoveNext())
-							{
-								array.Add(Il2CppSystem.Convert.ToInt32(e1.Current));
-							}
-
-							jobj["data"] = array;
-						}
-						else if (objTypeString == "System.String[]")
-						{
-							jobj["type"] = "String[]";
-
-							JArray array = new JArray();
-							Il2CppSystem.Collections.IEnumerator e1 = obj.Cast<Il2CppSystem.Collections.IEnumerable>().GetEnumerator();
-
-							while (e1.MoveNext())
-							{
-								array.Add(Il2CppSystem.Convert.ToString(e1.Current));
-							}
-
-							jobj["data"] = array;
-						}
-						else if (objTypeString == "System.String[][]")
-						{
-							jobj["type"] = "String[][]";
-
-							JArray outerArray = new JArray();
-							Console.WriteLine(obj.ToString());
-							Il2CppSystem.Collections.IEnumerator e1 = obj.Cast<Il2CppSystem.Collections.IEnumerable>().GetEnumerator();
-
-							while (e1.MoveNext())
-							{
-								JArray innerArray = new JArray();
-
-								UnhollowerBaseLib.Il2CppStringArray e2 = e1.Current.Cast<UnhollowerBaseLib.Il2CppStringArray>();
-								Console.WriteLine(e2.Length);
-								foreach (var str in e2)
-								{
-									innerArray.Add(str);
-								}
-
-								outerArray.Add(innerArray);
-							}
-
-							jobj["data"] = outerArray;
-						}
-						else if (objTypeString == "System.Object[]")
-						{
-							jobj["type"] = "Object[]";
-
-							JArray array = new JArray();
-							Il2CppSystem.Collections.IEnumerator e1 = obj.Cast<Il2CppSystem.Collections.IEnumerable>().GetEnumerator();
-
-							while (e1.MoveNext())
-							{
-								array.Add(ParseIl2CppObject(e1.Current));
-							}
-
-							jobj["data"] = array;
-						}
 						else
 						{
-							jobj["type"] = objTypeString;
-							jobj["data"] = obj.ToString();
+							string name = objType.Name;
+							string fullname = objType.FullName;
+
+							if (fullname.StartsWith("System."))
+							{
+								jobj["type"] = fullname;
+								switch (name)
+								{
+									case "Boolean":
+										jobj["data"] = Il2CppSystem.Convert.ToBoolean(obj);
+										break;
+									case "Byte":
+										jobj["data"] = Il2CppSystem.Convert.ToByte(obj);
+										break;
+									case "Int32":
+										jobj["data"] = Il2CppSystem.Convert.ToInt32(obj);
+										break;
+									case "Double":
+										jobj["data"] = Il2CppSystem.Convert.ToDouble(obj);
+										break;
+									case "String":
+										jobj["data"] = Il2CppSystem.Convert.ToString(obj);
+										break;
+									case "Byte[]":
+										byte[] byteArray;
+										unsafe
+										{
+											IntPtr objPtr = obj.Pointer;
+											Int32 arraySize = *(Int32*)(objPtr + 24);
+											byteArray = new byte[arraySize];
+											Marshal.Copy(objPtr + 32, byteArray, 0, arraySize);
+										}
+										jobj["data"] = Convert.ToBase64String(byteArray);
+										break;
+									case "Int32[]":
+										JArray int32Array = new JArray();
+										Il2CppSystem.Collections.IEnumerator int32ArrauEnumerator = obj.Cast<Il2CppSystem.Collections.IEnumerable>().GetEnumerator();
+
+										while (int32ArrauEnumerator.MoveNext())
+										{
+											int32Array.Add(Il2CppSystem.Convert.ToInt32(int32ArrauEnumerator.Current));
+										}
+
+										jobj["data"] = int32Array;
+										break;
+									case "String[]":
+										JArray jsonStringArray = new JArray();
+										Il2CppSystem.Collections.IEnumerator stringArrayEnumerator = obj.Cast<Il2CppSystem.Collections.IEnumerable>().GetEnumerator();
+
+										while (stringArrayEnumerator.MoveNext())
+										{
+											jsonStringArray.Add(Il2CppSystem.Convert.ToString(stringArrayEnumerator.Current));
+										}
+
+										jobj["data"] = jsonStringArray;
+										break;
+									case "String[][]":
+										JArray jsonStringArrayArray = new JArray();
+										Console.WriteLine(obj.ToString());
+										Il2CppSystem.Collections.IEnumerator stringArrayArrayEnumerator = obj.Cast<Il2CppSystem.Collections.IEnumerable>().GetEnumerator();
+
+										while (stringArrayArrayEnumerator.MoveNext())
+										{
+											JArray jsonInnerStringArray = new JArray();
+
+											UnhollowerBaseLib.Il2CppStringArray innerStringArrayEnumerator = stringArrayArrayEnumerator.Current.Cast<UnhollowerBaseLib.Il2CppStringArray>();
+											Console.WriteLine(innerStringArrayEnumerator.Length);
+											foreach (var str in innerStringArrayEnumerator)
+											{
+												jsonInnerStringArray.Add(str);
+											}
+
+											jsonStringArrayArray.Add(jsonInnerStringArray);
+										}
+
+										jobj["data"] = jsonStringArrayArray;
+										break;
+									case "Object[]":
+										JArray jsonObjectArray = new JArray();
+										Il2CppSystem.Collections.IEnumerator objectArrayEnumerator = obj.Cast<Il2CppSystem.Collections.IEnumerable>().GetEnumerator();
+
+										while (objectArrayEnumerator.MoveNext())
+										{
+											jsonObjectArray.Add(ParseIl2CppObject(objectArrayEnumerator.Current));
+										}
+
+										jobj["data"] = jsonObjectArray;
+										break;
+									default:
+										jobj["type"] = fullname;
+										jobj["data"] = obj.ToString();
+										break;
+								}
+							}
+							else
+							{
+								jobj["type"] = fullname;
+								jobj["data"] = obj.ToString();
+							}
 						}
 					}
 					catch (Exception ex)
 					{
 						if (!jobj.ContainsKey("type"))
 						{
-							jobj["type"] = objTypeString;
+							jobj["type"] = objType.FullName;
 						}
 						jobj["exception"] = ex.ToString();
 					}
@@ -314,22 +299,6 @@ namespace PhotonDebug
 			}
 		}
 
-		internal static void Init()
-		{
-			logFileName = $"PhotonDebug/log_{DateTime.UtcNow.ToString(logFileDateFormat)}.json";
-			File.WriteAllText(logFileName, "[\n]");
-
-			MelonLogger.Msg("Creating HarmonyInstance");
-
-			var harmonyInstane = new HarmonyLib.Harmony("PhotonDebug");
-			harmonyInstane.Patch(typeof(ExitGames.Client.Photon.PhotonPeer).GetMethod("Connect", BindingFlags.Public | BindingFlags.Instance), GetPatch("ConnectPatch"));
-			harmonyInstane.Patch(typeof(ExitGames.Client.Photon.PhotonPeer).GetMethod("SendOperation", BindingFlags.Public | BindingFlags.Instance), GetPatch("SendOperationPatch"));
-			harmonyInstane.Patch(typeof(Photon.Realtime.LoadBalancingClient).GetMethod("OnEvent", BindingFlags.Public | BindingFlags.Instance), GetPatch("OnEventPatch"));
-			harmonyInstane.Patch(typeof(Photon.Realtime.LoadBalancingClient).GetMethod("OnOperationResponse", BindingFlags.Public | BindingFlags.Instance), GetPatch("OnOperationResponsePatch"));
-			harmonyInstane.Patch(typeof(Photon.Realtime.LoadBalancingClient).GetMethod("OnStatusChanged", BindingFlags.Public | BindingFlags.Instance), GetPatch("OnStatusChangedPatch"));
-			harmonyInstane.Patch(typeof(Photon.Realtime.Player).GetMethod("Method_Public_Void_Hashtable_0", BindingFlags.Public | BindingFlags.Instance), GetPatch("SetAppSettingsPatch"));
-		}
-
 		[MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
 		private static void ConnectPatch(string serverAddress, string proxyServerAddress, string applicationName, Object custom)
 		{
@@ -370,26 +339,33 @@ namespace PhotonDebug
 		}
 
 		[MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
-		private static void OnEventPatch(ExitGames.Client.Photon.EventData param_1)
+		private static void OnEventPatch(IntPtr thisPtr, IntPtr eventDataPtr, IntPtr nativeMethodInfo)
 		{
-			var sinceEpoch = DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1));
+			if (thisPtr != IntPtr.Zero && eventDataPtr != IntPtr.Zero)
+			{
+				var eventData = new ExitGames.Client.Photon.EventData(eventDataPtr);
 
-			LogJson(new JObject(
-					new JProperty("utc_time", sinceEpoch.TotalSeconds),
-					new JProperty("patch_name", "OnEventPatch"),
-					new JProperty("patch_args", new JObject(
-						new JProperty("eventData", new JObject(
-							new JProperty("Code", param_1.Code),
-							new JProperty("Parameters", ParseIl2CppObject(param_1.Parameters)),
-							new JProperty("SenderKey", param_1.SenderKey),
-							new JProperty("sender", param_1.sender),
-							new JProperty("CustomDataKey", param_1.CustomDataKey),
-							new JProperty("customData", ParseIl2CppObject(param_1.customData)),
-							new JProperty("Sender", param_1.Sender),
-							new JProperty("CustomData", ParseIl2CppObject(param_1.CustomData))
-							))
-					))
-				));
+				var sinceEpoch = DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1));
+
+				LogJson(new JObject(
+						new JProperty("utc_time", sinceEpoch.TotalSeconds),
+						new JProperty("patch_name", "OnEventPatch"),
+						new JProperty("patch_args", new JObject(
+							new JProperty("eventData", new JObject(
+								new JProperty("Code", eventData.Code),
+								new JProperty("Parameters", ParseIl2CppObject(eventData.Parameters)),
+								new JProperty("SenderKey", eventData.SenderKey),
+								new JProperty("sender", eventData.sender),
+								new JProperty("CustomDataKey", eventData.CustomDataKey),
+								new JProperty("customData", ParseIl2CppObject(eventData.customData)),
+								new JProperty("Sender", eventData.Sender),
+								new JProperty("CustomData", ParseIl2CppObject(eventData.CustomData))
+								))
+						))
+					));
+			}
+
+			_originalOnEvent(thisPtr, eventDataPtr, nativeMethodInfo);
 		}
 
 		[MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
@@ -457,6 +433,35 @@ namespace PhotonDebug
 							))
 					))
 				));
+		}
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		private delegate void OnEventDelegate(IntPtr thisPtr, IntPtr eventDataPtr, IntPtr nativeMethodInfo);
+		private static OnEventDelegate _originalOnEvent;
+
+		internal static unsafe void Init()
+		{
+			logFileName = $"PhotonDebug/log_{DateTime.UtcNow.ToString(logFileDateFormat)}.json";
+			File.WriteAllText(logFileName, "[\n]");
+
+			MelonLogger.Msg("Creating HarmonyInstance");
+
+			Stopwatch sw = new Stopwatch();
+			sw.Start();
+
+			var originalMethodPtr = *(IntPtr*)(IntPtr)UnhollowerUtils.GetIl2CppMethodInfoPointerFieldForGeneratedMethod(typeof(Photon.Realtime.LoadBalancingClient).GetMethod(nameof(Photon.Realtime.LoadBalancingClient.OnEvent))).GetValue(null);
+			MelonUtils.NativeHookAttach((IntPtr)(&originalMethodPtr), typeof(Patches).GetMethod(nameof(OnEventPatch), BindingFlags.Static | BindingFlags.NonPublic).MethodHandle.GetFunctionPointer());
+			_originalOnEvent = Marshal.GetDelegateForFunctionPointer<OnEventDelegate>(originalMethodPtr);
+
+			var harmonyInstane = new HarmonyLib.Harmony("PhotonDebug");
+			harmonyInstane.Patch(typeof(ExitGames.Client.Photon.PhotonPeer).GetMethod("Connect", BindingFlags.Public | BindingFlags.Instance), GetPatch("ConnectPatch"));
+			harmonyInstane.Patch(typeof(ExitGames.Client.Photon.PhotonPeer).GetMethod("SendOperation", BindingFlags.Public | BindingFlags.Instance), GetPatch("SendOperationPatch"));
+			harmonyInstane.Patch(typeof(Photon.Realtime.LoadBalancingClient).GetMethod("OnOperationResponse", BindingFlags.Public | BindingFlags.Instance), GetPatch("OnOperationResponsePatch"));
+			harmonyInstane.Patch(typeof(Photon.Realtime.LoadBalancingClient).GetMethod("OnStatusChanged", BindingFlags.Public | BindingFlags.Instance), GetPatch("OnStatusChangedPatch"));
+			//harmonyInstane.Patch(typeof(Photon.Realtime.Player).GetMethod("Method_Public_Void_Hashtable_0", BindingFlags.Public | BindingFlags.Instance), GetPatch("SetAppSettingsPatch"));
+
+			sw.Stop();
+			MelonLogger.Msg($"Patched in {sw.ElapsedMilliseconds}ms");
 		}
 	}
 }
